@@ -1,5 +1,10 @@
 # AreaMonitor
 
+# Meeting Times
+Sprint Planning: Tuesday of sprint; T 10:00 am - 10:50 am
+
+Weekly Scrum Meetings: R 2:00 pm - 2:50 pm
+
 ## Setup Remote Access
 Github has removed password authentication in the command line. You will have to set up an ssh key. Follow these steps (skip to 3 if you have a key):
 1. Open a terminal or powershell
@@ -77,7 +82,7 @@ Pay attention to the messages that appear. If you see any signs that there's a m
 ## File/Folder Structure
 Important folders/files and descriptions:
 ```
-cad - solidworks/inventor files 
+cad - inventor files 
 
 env - files for setting up the environment of the Pi
   \- nginx.conf          - nginx configuration file
