@@ -1,4 +1,3 @@
-console.log('Web Server Spawned');
 import fastify, { FastifyInstance } from 'fastify';
 import { WebApp } from '../services/web-app';
 
@@ -73,6 +72,8 @@ function main() {
     if (port == null) {
         throw 'Bad port';
     }
+
+    console.log('Web Server Spawned');
 
     let webserver = new WebServer({
         port: port
