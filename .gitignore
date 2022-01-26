@@ -1,1 +1,7 @@
+node_modules
 software/node_modules
+
+.DS_Store
+
+*.css
+*.css.map

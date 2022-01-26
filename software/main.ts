@@ -10,17 +10,17 @@ interface Subprocesses {
 }
 
 function spawnWebServer(port: number): ChildProcess {
-    let proc = fork('services/web-server.ts', ['-p', `${port}`]);
+    let proc = fork('subsystems/web-server.ts', ['-p', `${port}`]);
     return proc;
 }
 
 function spawnNodeLogic(port: number): ChildProcess {
-    let proc = fork('services/node-logic.ts', ['-p', `${port}`]);
+    let proc = fork('subsystems/node-logic.ts', ['-p', `${port}`]);
     return proc;
 }
 
 function spawnPTCtrl(port: number): ChildProcess {
-    let proc = spawn('python3', ['services/pt-ctrl.py', '-p', `${port}`]);
+    let proc = spawn('python3', ['subsystems/pt-ctrl.py', '-p', `${port}`]);
     proc.stdout.on('data', (data) => {
         process.stdout.write(`${data}`);
     });
@@ -32,7 +32,7 @@ function spawnPTCtrl(port: number): ChildProcess {
 }
 
 function spawnVidCapt(port: number): ChildProcess {
-    let proc = spawn('python3', ['services/vid-capt.py', '-p', `${port}`]);
+    let proc = spawn('python3', ['subsystems/vid-capt.py', '-p', `${port}`]);
     proc.stdout.on('data', (data) => {
         process.stdout.write(`${data}`);
     });
@@ -44,7 +44,7 @@ function spawnVidCapt(port: number): ChildProcess {
 }
 
 function spawnVidProc(port: number): ChildProcess {
-    let proc = spawn('python3', ['services/vid-proc.py', '-p', `${port}`]);
+    let proc = spawn('python3', ['subsystems/vid-proc.py', '-p', `${port}`]);
     proc.stdout.on('data', (data) => {
         process.stdout.write(`${data}`);
     });
@@ -56,7 +56,7 @@ function spawnVidProc(port: number): ChildProcess {
 }
 
 function spawnVidRetr(port: number): ChildProcess {
-    let proc = fork('services/vid-retr.ts', ['-p', `${port}`]);
+    let proc = fork('subsystems/vid-retr.ts', ['-p', `${port}`]);
     return proc;
 }
 
