@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node main.ts -p 8000",
-    "start-not-pi": "ts-node main.ts -p 8000 --notPi"
+    "start-not-pi": "ts-node main.ts -p 8000 --notPi",
+    "build-frontend": "sass frontend/scss:frontend/public"
   },
   "repository": {
     "type": "git",
@@ -18,8 +19,18 @@
   },
   "homepage": "https://github.com/Zhongy1/AreaMonitor#readme",
   "dependencies": {
+    "@types/ejs": "^3.1.0",
     "@types/node": "^17.0.9",
+    "ejs": "^3.1.6",
+    "fastify": "^3.25.3",
+    "fastify-static": "^4.5.0",
+    "passport-local": "^1.0.0",
+    "pino-pretty": "^7.5.0",
+    "point-of-view": "^5.0.0",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.4"
+  },
+  "devDependencies": {
+    "sass": "^1.49.0"
   }
 }

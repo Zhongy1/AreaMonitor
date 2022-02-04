@@ -1,0 +1,26 @@
+body {
+    margin: 0px;
+}
+
+.server-details {
+    width: fit-content;
+    height: fit-content;
+    font-family: Menlo;
+    margin: auto;
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    animation: 4s 2s forwards fadeout;
+    
+    span {
+        font-weight: bold;
+    }
+
+    @keyframes fadeout {
+        from { opacity: 1; }
+        to   { 
+            opacity: 0;
+            display: none;
+        }
+    }
+}
