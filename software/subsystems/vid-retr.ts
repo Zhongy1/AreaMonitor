@@ -96,6 +96,9 @@ export class VideoServer {
     public async deleteRecording(fname: string, rname: string): Promise<boolean> {
         if (!fs.existsSync(path.resolve(this.vidDirectory, fname, rname))) return false;
         await del(path.resolve(this.vidDirectory, fname, rname));
+        if (this.getRecordings(fname).length == 0) {
+            await del(path.resolve(this.vidDirectory, fname));
+        }
         return true;
     }
 }
