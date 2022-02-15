@@ -38,17 +38,12 @@ export class WebServer {
             if (err) {
                 throw err;
             }
-            console.log('\x1b[1m\x1b[34m-----------------------------------\x1b[0m');
-            console.group();
-            console.log(`Web server is running on \x1b[1m\x1b[35m*:${this.config.port}\x1b[0m`);
-            console.group();
-            console.log(`Node Version: \x1b[1m\x1b[33m${process.version}\x1b[0m`);
-            // console.log(`Environment:   \x1b[1m\x1b[36m${config.dev ? 'Development' : 'Production'}\x1b[0m`);
-            // console.log(`App component: \x1b[1m${config.useApp ? '\x1b[32mEnabled' : '\x1b[31mDisabled'}\x1b[0m`);
-            // console.log(`Api component: \x1b[1m${config.useApi ? '\x1b[32mEnabled' : '\x1b[31mDisabled'}\x1b[0m`);
-            console.groupEnd();
-            console.groupEnd();
-            console.log('\x1b[1m\x1b[34m-----------------------------------\x1b[0m');
+            console.log(
+                '\x1b[1m\x1b[34m-----------------------------------\x1b[0m\n' +
+                `  Web server is running on \x1b[1m\x1b[35m*:${this.config.port}\x1b[0m\n` +
+                `    Node Version: \x1b[1m\x1b[33m${process.version}\x1b[0m\n` +
+                '\x1b[1m\x1b[34m-----------------------------------\x1b[0m'
+            );
         });
     }
 
