@@ -5,3 +5,5 @@ software/node_modules
 
 *.css
 *.css.map
+
+*/storage

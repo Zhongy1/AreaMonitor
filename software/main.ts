@@ -4,7 +4,7 @@ interface Subprocesses {
     webServer: ChildProcess;
     nodeLogic: ChildProcess;
     ptCtrl: ChildProcess;
-    vidCapt: ChildProcess;
+    // vidCapt: ChildProcess;
     vidProc: ChildProcess;
     vidRetr: ChildProcess;
 }
@@ -31,17 +31,17 @@ function spawnPTCtrl(port: number): ChildProcess {
     return proc;
 }
 
-function spawnVidCapt(port: number): ChildProcess {
-    let proc = spawn('python3', ['subsystems/vid-capt.py', '-p', `${port}`]);
-    proc.stdout.on('data', (data) => {
-        process.stdout.write(`${data}`);
-    });
+// function spawnVidCapt(port: number): ChildProcess {
+//     let proc = spawn('python3', ['subsystems/vid-capt.py', '-p', `${port}`]);
+//     proc.stdout.on('data', (data) => {
+//         process.stdout.write(`${data}`);
+//     });
 
-    proc.stderr.on('data', (data) => {
-        process.stderr.write(`${data}`);
-    });
-    return proc;
-}
+//     proc.stderr.on('data', (data) => {
+//         process.stderr.write(`${data}`);
+//     });
+//     return proc;
+// }
 
 function spawnVidProc(port: number): ChildProcess {
     let proc = spawn('python3', ['subsystems/vid-proc.py', '-p', `${port}`]);
@@ -82,9 +82,9 @@ function main(): void {
         webServer: spawnWebServer(port),
         nodeLogic: spawnNodeLogic(port + 1),
         ptCtrl: (notPi) ? null : spawnPTCtrl(port + 2),
-        vidCapt: (notPi) ? null : spawnVidCapt(port + 3),
-        vidProc: (notPi) ? null : spawnVidProc(port + 4),
-        vidRetr: spawnVidRetr(port + 5)
+        // vidCapt: (notPi) ? null : spawnVidCapt(port + 3),
+        vidProc: (notPi) ? null : spawnVidProc(port + 3),
+        vidRetr: spawnVidRetr(port + 4)
     }
 
     setInterval(() => {
