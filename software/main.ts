@@ -1,4 +1,5 @@
 import { spawn, fork, ChildProcess } from 'child_process';
+import { CONFIG } from '../config';
 
 interface Subprocesses {
     webServer: ChildProcess;
@@ -79,12 +80,12 @@ function main(): void {
     console.log('Initializing Area Monitor...')
 
     let subproc: Subprocesses = {
-        webServer: spawnWebServer(port),
-        nodeLogic: spawnNodeLogic(port + 1),
-        ptCtrl: (notPi) ? null : spawnPTCtrl(port + 2),
+        webServer: spawnWebServer(CONFIG.WEB_SERVER_PORT),
+        nodeLogic: spawnNodeLogic(CONFIG.NODE_LOGIC_PORT),
+        ptCtrl: (notPi) ? null : spawnPTCtrl(CONFIG.PT_CTRL_PORT),
         // vidCapt: (notPi) ? null : spawnVidCapt(port + 3),
-        vidProc: (notPi) ? null : spawnVidProc(port + 3),
-        vidRetr: spawnVidRetr(port + 4)
+        vidProc: (notPi) ? null : spawnVidProc(CONFIG.VID_PROC_PORT),
+        vidRetr: spawnVidRetr(CONFIG.VID_RETR_PORT)
     }
 
     setInterval(() => {
