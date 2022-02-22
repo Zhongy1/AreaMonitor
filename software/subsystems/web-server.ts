@@ -38,6 +38,7 @@ export class WebServer {
         await this.setupMiddleware();
 
         this.webapp.initApp();
+        this.sioService.registerIO();
 
         this.app.listen(this.config.port, '0.0.0.0', err => {
             if (err) {

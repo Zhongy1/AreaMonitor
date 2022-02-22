@@ -19,9 +19,12 @@ export class SIOService {
         this.initialized = false;
     }
 
+    public registerIO(): void {
+        this.app.register(fastifyIO, {});
+    }
+
     public initIO(): void {
         this.initialized = true;
-        this.app.register(fastifyIO, {});
         this.initNamespaces();
         this.initListeners();
     }
