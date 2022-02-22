@@ -38,7 +38,6 @@ export class WebServer {
         await this.setupMiddleware();
 
         this.webapp.initApp();
-        this.sioService.initIO()
 
         this.app.listen(this.config.port, '0.0.0.0', err => {
             if (err) {
@@ -50,6 +49,10 @@ export class WebServer {
                 `    Node Version: \x1b[1m\x1b[33m${process.version}\x1b[0m\n` +
                 '\x1b[1m\x1b[34m-----------------------------------\x1b[0m'
             );
+        });
+
+        this.app.ready().then(() => {
+            this.sioService.initIO();
         });
     }
 

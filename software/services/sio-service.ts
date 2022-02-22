@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import socketioServer from 'fastify-socket.io'
+import fastifyIO from 'fastify-socket.io'
 import { WebServerConfig } from '../subsystems/web-server';
 import { Namespace } from 'socket.io';
 import { io, Socket } from "socket.io-client";
@@ -15,13 +15,13 @@ export class SIOService {
     public initialized: boolean;
     private namespaces: SIONamespaces;
 
-    constructor(private app: FastifyInstance, private config: WebServerConfig) {
+    constructor(public app: FastifyInstance, private config: WebServerConfig) {
         this.initialized = false;
     }
 
     public initIO(): void {
         this.initialized = true;
-        this.app.register(socketioServer);
+        this.app.register(fastifyIO, {});
         this.initNamespaces();
         this.initListeners();
     }
@@ -29,13 +29,13 @@ export class SIOService {
     private initNamespaces(): void {
         this.namespaces = {
             external: null,
-            nodeLogic: this.app.io.of('nl'),
-            videoProc: this.app.io.of('vp'),
-            panTilt: this.app.io.of('pt')
+            nodeLogic: this.app.io.of('/nl'),
+            videoProc: this.app.io.of('/vp'),
+            panTilt: this.app.io.of('/pt')
         }
 
         if (this.config.master) {
-            this.namespaces.external = this.app.io.of('ext')
+            this.namespaces.external = this.app.io.of('/ext')
         }
         else {
             // specify the ip of the master camera
