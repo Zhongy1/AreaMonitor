@@ -24,3 +24,41 @@ body {
         }
     }
 }
+
+.joystick {
+    width: 100px;
+    height: 100px;
+    background-color: gray;
+    border-radius: 50%;
+    margin: 30px;
+    position: relative;
+
+    >div {
+        width: 50%;
+        height: 50%;
+        background-color: darkgray;
+        border-radius: 50%;
+        position: absolute;
+        top: 25%;
+        left: 25%;
+    }
+
+    &.released>div {
+        transition: top 0.2s, left 0.2s;
+    }
+}
+
+.int-test1-area {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+
+    .joystick {
+        top: 0px;
+        bottom: 0px;
+        left: 0px;
+        right: 0px;
+        position: absolute;
+        margin: auto;
+    }
+}

@@ -1,13 +1,17 @@
 import fastify, { FastifyInstance } from 'fastify';
+import { SIOService } from '../services/sio-service';
 import { WebApp } from '../services/web-app';
 
 
 export interface WebServerConfig {
     port: number;
+    master: boolean;
 }
 
 export class WebServer {
     private app: FastifyInstance;
+
+    private sioService: SIOService;
 
     private webapp: WebApp;
 
@@ -20,7 +24,8 @@ export class WebServer {
             ignoreTrailingSlash: true,
         });
 
-        this.webapp = new WebApp(this.app, config);
+        this.sioService = new SIOService(this.app, config);
+        this.webapp = new WebApp(this.app, this.sioService, config);
 
         this.initialize();
     }
@@ -33,6 +38,7 @@ export class WebServer {
         await this.setupMiddleware();
 
         this.webapp.initApp();
+        this.sioService.initIO()
 
         this.app.listen(this.config.port, '0.0.0.0', err => {
             if (err) {
@@ -71,7 +77,8 @@ function main() {
     console.log('Web Server Spawned');
 
     let webserver = new WebServer({
-        port: port
+        port: port,
+        master: true
     });
 
 }
