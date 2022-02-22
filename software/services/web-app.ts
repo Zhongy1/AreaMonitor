@@ -62,6 +62,7 @@ export class WebApp {
             let r = (parseInt(req.query.x) || 0) * 90 / 100;
             let t = (parseInt(req.query.y) || 0) * 90 / 100;
             this.sioService.ptSetPos({ r: r, t: t });
+            reply.status(204);
             return;
         });
     }
