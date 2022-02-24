@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import time
+import threading
 import socketio 
 import signal
 import sys 
@@ -7,6 +8,10 @@ import sys
 class ptCtrl:
 
     def __init__(self, config):
+        self.sio = socketio.Client(reconnection_delay=5, reconnection_delay_max=5, handle_sigint=True)
+        self.initIO()
+        self.connectIO()
+        
         self.panServoPin = 11
         self.tiltServoPin = 13
         GPIO.setmode(GPIO.BOARD)
@@ -19,10 +24,29 @@ class ptCtrl:
         self.t = 5.0
         self.panner.start(self.r)
         self.tilter.start(self.t)
-    
+        
 
     # Initialize the servos and pins
-    def initialize(self):
+    def initIO(self):
+        
+        @self.sio.on('doOffset', namespace='/pt')
+        def on_doOffset(opts):
+            self.offsetPos(opts['r'], opts['t'])
+        
+        @self.sio.on('setPos', namespace='/pt') 
+        def on_setPos(opts):
+            self.setPos(opts['r'], opts['t'])
+        
+        return
+        
+    def connectIO(self):
+        while True:
+            try:
+                self.sio.connect('ws://localhost:3000', namespaces=['/pt'])
+                return
+            except Exception:
+                time.sleep(5)
+        
         return
     
     # Overwrite the home position with the current position
@@ -56,41 +80,25 @@ class ptCtrl:
 
     def tiltDown(self, distance):
         return
-        
-#time.sleep(27)
-ptObj = ptCtrl(1)
 
-sio = socketio.Client()
-
-@sio.event
-def connect():
-    print('connected')
-
-@sio.on('setPos', namespace='/pt') 
-def setPos(opts):
-    print(opts)
-    ptObj.setPos(opts['r'], opts['t'])
-    print("Setting Position")
-   
-  
-sio.connect('ws://localhost:3000', namespaces=['/pt'])
-    
 def main():
     print('Pan/Tilt Control Spawned')
-    #initialize()
-
     
+    def sigint_handler(signal, frame):
+        try:
+            ptObj.sio.disconnect()
+            ptObj.panner.stop()
+            ptObj.tilter.stop()
+        except Exception:
+            pass
+        GPIO.cleanup()
+    
+    signal.signal(signal.SIGINT, sigint_handler)
+    
+    ptObj = ptCtrl(1)
+            
 
-def sigint_handler(signal, frame):
-    ptObj.panner.stop()
-    ptObj.tilter.stop()
-    GPIO.cleanup() 
-    sys.exit(0)
-signal.signal(signal.SIGINT, sigint_handler)
 if __name__ == "__main__":
     """ This is executed when run from the command line """
     main()
-    #ptObj.panner.stop()
-    #ptObj.tilter.stop()
-    #GPIO.cleanup()
 
