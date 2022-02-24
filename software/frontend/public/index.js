@@ -134,6 +134,7 @@ class $590ce656a7d9e99b$export$41026bc5091240de {
 
 let $31061dbdc1b1f585$var$joystick = new $590ce656a7d9e99b$export$41026bc5091240de(document.getElementById('joy-1'), {
     sendTo: '/integration/test1',
+    sendInterval: 200,
     debug: true
 });
 $31061dbdc1b1f585$var$joystick.init();
