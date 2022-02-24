@@ -24,8 +24,10 @@ export class NodeLogic {
         this.leftNodeId = config.leftNodeId;
         this.rightNodeId = config.rightNodeId;
         this.lastSignal = 0;
-        this.home.r = config.home.r;
-        this.home.t = config.home.t;
+        this.home = {
+            r: config.home.r,
+            t: config.home.t
+        }
         this.currR = this.home.r;
         this.currT = this.home.t;
     }
