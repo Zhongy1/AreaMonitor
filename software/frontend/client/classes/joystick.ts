@@ -83,7 +83,8 @@ export class Joystick {
         if (!this.enabled) return;
 
         let touch = e.touches[0] || e.changedTouches[0];
-        this.updatePositionData(touch.pageX - this.elem.offsetLeft - this.elem.offsetWidth / 2, touch.pageY - this.elem.offsetTop - this.elem.offsetWidth / 2);
+        let domRect = this.elem.getBoundingClientRect();
+        this.updatePositionData(touch.clientX - domRect.left - this.elem.offsetWidth / 2, touch.clientY - domRect.top - this.elem.offsetWidth / 2);
         this.elem.classList.remove('released');
         this.repositionStick();
         this.dispatchState();
@@ -94,7 +95,8 @@ export class Joystick {
         if (!this.enabled) return;
 
         let touch = e.touches[0] || e.changedTouches[0];
-        this.updatePositionData(touch.pageX - this.elem.offsetLeft - this.elem.offsetWidth / 2, touch.pageY - this.elem.offsetTop - this.elem.offsetWidth / 2);
+        let domRect = this.elem.getBoundingClientRect();
+        this.updatePositionData(touch.clientX - domRect.left - this.elem.offsetWidth / 2, touch.clientY - domRect.top - this.elem.offsetWidth / 2);
         this.repositionStick();
     }
 
