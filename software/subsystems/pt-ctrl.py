@@ -1,4 +1,5 @@
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
+import pigpio
 import time
 import threading
 import socketio 
@@ -12,18 +13,13 @@ class ptCtrl:
         self.initIO()
         self.connectIO()
         
-        self.panServoPin = 11
-        self.tiltServoPin = 13
-        GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(self.panServoPin, GPIO.OUT)
-        GPIO.setup(self.tiltServoPin,GPIO.OUT)
-
-        self.panner = GPIO.PWM(self.panServoPin, 50)
-        self.tilter = GPIO.PWM(self.tiltServoPin, 50)
-        self.r = 7.5
-        self.t = 5.0
-        self.panner.start(self.r)
-        self.tilter.start(self.t)
+        self.panServoPin = 17
+        self.tiltServoPin = 27
+        self.pi = pigpio.pi()
+        self.r = 1500
+        self.t = 2000
+        self.pi.set_servo_pulsewidth(self.panServoPin, self.r)
+        self.pi.set_servo_pulsewidth(self.tiltServoPin, self.t)
         
 
     # Initialize the servos and pins
@@ -48,38 +44,67 @@ class ptCtrl:
                 time.sleep(5)
         
         return
-    
-    # Overwrite the home position with the current position
-    def setHome(self, x, y):
-        return
-
-    # Traverse to the home position
-    def goHome():
-        return
 
     # Traverse to the desired coordinates at the desired speed
     # (Tim) We can consider exlcuding this function if deemed unnecessary.
     def setPos(self, r, t):
-        self.r = r*5/100 + 7.5
-        self.t = t*5/100 + 7.5
-        self.panner.ChangeDutyCycle(self.r)
-        self.tilter.ChangeDutyCycle(self.t)
+        self.setPanDeg(r)
+        self.setTiltDeg(t)
+        self.updatePos()
         return
 
-    def offsetPos(self, x, y):
-        return
+    def offsetPos(self, r, t):
+        if(r  > 180):
+            r = 180
+        elif(r < -180):
+            r = -180
+        
+        if(t > 90):
+            t = 90
+        elif(t < -90):
+            t = -90
+        
+        offsetR = r*2000/180
+        offsetT = t*2000/180
+        self.setPan(self.r + offsetR)
+        self.setTilt(self.t + offsetT)
+        self.updatePos()
 
-    def panLeft(self, distance):
-        self.panner.ChangeDutyCycle(2.5)
+    def setPan(self, r):
+        if(r  > 2500):
+            r = 2500
+        elif(r < 500):
+            r = 500
+        self.r = r
+        self.pi.set_servo_pulsewidth(self.panServoPin, self.r)
 
-    def panRight(self, distance):
-        self.panner.ChangeDutyCycle(12.5)
+    def setPanDeg(self, r):
+        if(r  > 90):
+            r = 90
+        elif(r < -90):
+            r = -90
+        self.r = r*2000/180 + 1500 
+        self.pi.set_servo_pulsewidth(self.panServoPin, self.r)
+        
 
-    def tiltUp(self, distance):
-        return
+    def setTilt(self, t):
+        if(t > 2500):
+            t = 2500
+        elif(t < 1500):
+            t = 1500
+        self.t = t
+        self.pi.set_servo_pulsewidth(self.tiltServoPin, self.t)
 
-    def tiltDown(self, distance):
-        return
+    def setTiltDeg(self, t):
+        if(t > 90):
+            t = 90
+        elif(t < 0):
+            t = 0
+        self.t = t*2000/180 + 1500
+        self.pi.set_servo_pulsewidth(self.tiltServoPin, self.t)
+
+    def updatePos(self):
+        self.sio.emit('updatePos', {'r': self.r, 't' : self.t}, namespace='/pt')
 
 def main():
     print('Pan/Tilt Control Spawned')
@@ -87,11 +112,10 @@ def main():
     def sigint_handler(signal, frame):
         try:
             ptObj.sio.disconnect()
-            ptObj.panner.stop()
-            ptObj.tilter.stop()
+
         except Exception:
             pass
-        GPIO.cleanup()
+
     
     signal.signal(signal.SIGINT, sigint_handler)
     
