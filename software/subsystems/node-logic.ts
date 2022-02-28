@@ -105,6 +105,8 @@ export class NodeLogic {
             r: r,
             t: t
         });
+        this.lastActivity = Date.now();
+        this.informBusyState(true);
     }
 
     public setPos(r: number, t: number, setHome: boolean = false) {
@@ -116,6 +118,8 @@ export class NodeLogic {
             r: r,
             t: t
         });
+        this.lastActivity = Date.now();
+        this.informBusyState(true);
     }
 
     public updatePos(r: number, t: number) {
@@ -125,10 +129,8 @@ export class NodeLogic {
 
     public requestOffset(x: number, y: number) {
         // No preprocessing
-        this.sIO.emit('doOffset', {
-            r: x,
-            t: y
-        });
+        this.doOffset(x, y);
+        // How should it be processed?
     }
 
     public informBusyState(busy: boolean) {
