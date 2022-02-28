@@ -78,12 +78,12 @@ function main() {
         throw 'Bad port';
     }
 
-    console.log('Web Server Spawned');
-
     let webserver = new WebServer({
         port: port,
         master: true
     });
+
+    WebServer.log('Web Server Spawned');
 
 }
 
