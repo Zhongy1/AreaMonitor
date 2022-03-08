@@ -1,0 +1,13 @@
+<%# camId: string %>
+<%# fname: string %>
+<%# recPaths: string[] %>
+<%# rnames: string[] %>
+<h1>Explore</h1>
+<div>
+    <p>Path: <%="/" + camId + "/" + fname + "/"%></p>
+</div>
+<div>
+    <% for (let i = 0; i < recPaths.length; i++) { %>
+        <a href="<%=recPaths[i]%>"><%=rnames[i]%></a><br>
+    <% } %>
+</div>

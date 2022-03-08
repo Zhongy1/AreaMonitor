@@ -1,0 +1,16 @@
+<h1>Configure</h1>
+<form action="/config" method="post">
+    <label for="ssid">SSID:</label><br>
+    <input type="text" id="ssid" name="ssid"><br><br>
+    <label for="passwd">Password:</label><br>
+    <input type="password" id="passwd" name="passwd"><br><br>
+    <input type="checkbox" id="master" name="master" value="T">
+    <label for="master">Set as master</label><br><br>
+    <label for="camIP">Master IP:</label><br>
+    <input type="text" id="camIP" name="camIP"><br><br>
+    <input type="submit">
+</form>
+<%# ssid: string %>
+<%# passwd: string %>
+<%# master: string %>
+<%# camIP: string %>
