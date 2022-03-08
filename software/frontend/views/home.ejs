@@ -1,4 +1,26 @@
+<%# mode: Mode %>
+<%# camIP: string %>
 <h1>Home</h1>
+<div>
+    <a href="/config">config</a><br>
+    <a href="/cameras">cameras</a><br>
+    <a href="/explore">explore</a><br>
+</div>
+<div>
+    <div>Camera mode: <%=mode%></div>
+
+    <% if (camIP && camIP.length > 0) { %>
+        <div>Camera IP: <%=camIP[0]%></div>
+    <% } else { %>
+        <div>Camera IP: Unknown</div>
+    <% } %>
+
+    <% if (targetIP) { %>
+        <div>Target Camera IP: <%=targetIP%></div>
+    <% } else { %>
+        <div>Target Camera IP: Unknown</div>
+    <% } %>
+</div>
 
 <%- include('partials/server-details', {
     port: port,

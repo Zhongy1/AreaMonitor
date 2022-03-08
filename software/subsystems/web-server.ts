@@ -1,21 +1,34 @@
 import fastify, { FastifyInstance } from 'fastify';
+import formBody from 'fastify-formbody';
 import { SIOService } from '../services/sio-service';
 import { WebApp } from '../services/web-app';
-
+import { networkInterfaces } from 'os';
 
 export interface WebServerConfig {
     port: number;
-    master: boolean;
+    mode: Mode;
+    camIP: string[];
+    ssid?: string;
+    passwd?: string;
+    targetIP?: string;
+}
+
+export enum Mode {
+    Master, Client, Unspecified
 }
 
 export class WebServer {
     private app: FastifyInstance;
-
     private sioService: SIOService;
 
     private webapp: WebApp;
 
+    private mode: Mode;
+
     constructor(private config: WebServerConfig) {
+        this.mode = Mode.Unspecified;
+        this.configureMode(config.mode);
+
         this.app = fastify({
             // logger: true,
             logger: {
@@ -58,15 +71,69 @@ export class WebServer {
     }
 
     private async setupMiddleware(): Promise<void> {
-
+        this.app.register(formBody);
     }
 
     private initializePassport(): void {
 
     }
+
+    public handleConfigChange(config: Partial<WebServerConfig>): void {
+        if (config.hasOwnProperty('ssid') && config.hasOwnProperty('passwd')) {
+            this.configureWAP(config.ssid, config.passwd);
+        }
+        if (config.hasOwnProperty('master') && config.mode as unknown == 'T') {
+            this.configureMode(Mode.Master);
+        }
+        if (config.hasOwnProperty('camIP') && config.targetIP) {
+            this.config.targetIP = config.targetIP;
+            this.configureMode(Mode.Client);
+        }
+        else {
+            this.configureMode(Mode.Unspecified);
+        }
+    }
+
+    public handleCameraConnections(opts?: unknown): void {
+        // ?
+    }
+
+    private configureMode(mode: Mode): void {
+        // console.log('Mode: ' + Mode[mode]);
+        if (this.mode == Mode.Unspecified) {
+
+        }
+        else if (this.mode == Mode.Master) {
+
+        }
+        else if (this.mode == Mode.Client) {
+
+        }
+    }
+
+    private configureWAP(ssid: string, passwd: string): void {
+        this.config.ssid = ssid;
+        this.config.passwd = passwd;
+        // console.log('SSID: ' + ssid);
+    }
 }
 
-function main() {
+function getPublicIPs(): string[] {
+    const nets = networkInterfaces();
+    const results: string[] = [];
+
+    for (const name of Object.keys(nets)) {
+        for (const net of nets[name]) {
+            if (net.family === 'IPv4' && !net.internal) {
+                results.push(net.address);
+            }
+        }
+    }
+
+    return results;
+}
+
+function main(): void {
     let port = null;
     if (process.argv.includes('-p')) {
         let tempPort: number = Number(process.argv[process.argv.indexOf('-p') + 1]);
@@ -80,10 +147,12 @@ function main() {
 
     console.log('Web Server Spawned');
 
-    let webserver = new WebServer({
+    let config: WebServerConfig = {
         port: port,
-        master: true
-    });
+        mode: Mode.Unspecified,
+        camIP: getPublicIPs()
+    }
+    let webserver = new WebServer(config);
 
 }
 

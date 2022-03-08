@@ -1,0 +1,13 @@
+<%# camId: string %>
+<%# streamPath: string %>
+<%# fnames: string[] %>
+<h1>Explore</h1>
+<div>
+    <a href="<%=streamPath%>">Stream</a>
+    <p>Path: <%="/" + camId + "/"%></p>
+</div>
+<div>
+    <% for (let i = 0; i < fnames.length; i++) { %>
+        <a href="<%=camId + '/' + fnames[i]%>"><%=fnames[i]%></a><br>
+    <% } %>
+</div>

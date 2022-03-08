@@ -1,0 +1,9 @@
+<%# camIds: string[] %>
+<h1>Cameras</h1>
+<form class="cameras-text-view" action="/cameras" method="post">
+    <% for (let i = 0; i < camIds.length; i++) { %>
+        <div>
+            <input type="text" name="<%=camIds[i] + "_l"%>"> <%="Cam " + camIds[i]%> <input type="text" name="<%=camIds[i] + "_r"%>">
+        </div>
+    <% } %>
+</form>
