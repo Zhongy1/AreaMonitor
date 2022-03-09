@@ -45,11 +45,10 @@ function spawnPTCtrl(port: number): ChildProcess {
 // }
 
 function spawnVidProc(port: number): ChildProcess {
-    let proc = spawn('python3', ['subsystems/vid-proc.py', '-p', `${port}`]);
+    let proc = spawn('python3', ['subsystems/vid-proc.py', '--prototxt', 'services/MobileNetSSD_deploy.prototxt', '--model', 'services/MobileNetSSD_deploy.caffemodel']);
     proc.stdout.on('data', (data) => {
         process.stdout.write(`${data}`);
     });
-
     proc.stderr.on('data', (data) => {
         process.stderr.write(`${data}`);
     });
