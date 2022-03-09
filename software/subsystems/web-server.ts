@@ -145,14 +145,14 @@ function main(): void {
         throw 'Bad port';
     }
 
-    console.log('Web Server Spawned');
-
     let config: WebServerConfig = {
         port: port,
         mode: Mode.Unspecified,
         camIP: getPublicIPs()
     }
     let webserver = new WebServer(config);
+
+    WebServer.log('Web Server Spawned');
 
 }
 

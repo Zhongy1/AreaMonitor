@@ -47,57 +47,63 @@ export class SIOService {
     }
 
     private initListeners(): void {
-        this.namespaces.nodeLogic.on('informBusyState', (opts) => {
-
-        });
-        this.namespaces.nodeLogic.on('doOffset', (opts) => {
-
-        });
-        this.namespaces.nodeLogic.on('setPos', (opts) => {
-
-        });
-        this.namespaces.nodeLogic.on('signalNode', (opts) => {
-            // to a target node; use extReceiveSignal
-        });
-        this.namespaces.nodeLogic.on('ping', (opts) => {
-            // to a target node, use extPing
-        });
-        this.namespaces.nodeLogic.on('pong', (opts) => {
-            // to a target node, use extPong
-        });
-
-
-        this.namespaces.videoProc.on('requestOffset', (opts) => {
-
+        this.namespaces.nodeLogic.on('connection', (socket) => {
+            socket.on('informBusyState', (opts) => {
+                this.vpInformBusyState(opts);
+            });
+            socket.on('doOffset', (opts) => {
+                this.ptDoOffset(opts);
+            });
+            socket.on('setPos', (opts) => {
+                this.ptSetPos(opts);
+            });
+            socket.on('signalNode', (opts) => {
+                // to a target node; use extReceiveSignal
+            });
+            socket.on('ping', (opts) => {
+                // to a target node, use extPing
+            });
+            socket.on('pong', (opts) => {
+                // to a target node, use extPong
+            });
         });
 
+        this.namespaces.videoProc.on('connection', (socket) => {
+            socket.on('requestOffset', (opts) => {
+                this.nlRequestOffset(opts);
+            });
+        });
 
-        this.namespaces.panTilt.on('updatePos', (opts) => {
-
+        this.namespaces.panTilt.on('connection', (socket) => {
+            socket.on('updatePos', (opts) => {
+                this.nlUpdatePos(opts);
+            });
         });
 
 
-        this.namespaces.external.on('signalNode', (opts) => {
-            this.nlReceiveSignal(opts);
-        });
-        this.namespaces.external.on('ping', (opts) => {
-            this.nlPing(opts);
-        });
-        this.namespaces.external.on('pong', (opts) => {
-            this.nlPong(opts);
+        this.namespaces.videoProc.on('connection', (socket) => {
+            socket.on('signalNode', (opts) => {
+                this.nlReceiveSignal(opts);
+            });
+            socket.on('ping', (opts) => {
+                this.nlPing(opts);
+            });
+            socket.on('pong', (opts) => {
+                this.nlPong(opts);
+            });
         });
     }
 
-    public vpInformBusyState(opts: any): void {
-
+    public vpInformBusyState(opts: boolean): void {
+        this.namespaces.videoProc.emit('informBusyState', opts);
     }
 
-    public nlRequestOffset(opts: any): void {
-
+    public nlRequestOffset(opts: { x: number, y: number }): void {
+        this.namespaces.nodeLogic.emit('requestOffset', opts);
     }
 
-    public nlUpdatePos(opts: any): void {
-
+    public nlUpdatePos(opts: { r: number, t: number }): void {
+        this.namespaces.nodeLogic.emit('updatePos', opts);
     }
 
     public nlReceiveSignal(opts: any): void {
@@ -112,8 +118,8 @@ export class SIOService {
         this.namespaces.nodeLogic.emit('pong', opts);
     }
 
-    public ptDoOffset(opts: any): void {
-
+    public ptDoOffset(opts: { r: number, t: number }): void {
+        this.namespaces.panTilt.emit('doOffset', opts);
     }
 
     public ptSetPos(opts: { r: number, t: number }): void {
@@ -129,6 +135,10 @@ export class SIOService {
     }
 
     public extPong(opts: any): void {
+
+    }
+
+    public linkNode(): void {
 
     }
 }
