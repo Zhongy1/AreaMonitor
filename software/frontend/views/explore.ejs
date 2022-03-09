@@ -1,0 +1,10 @@
+<%# camIds: string[] %>
+<h1>Explore</h1>
+<div>
+    <p>Path: /</p>
+</div>
+<div>
+    <% for (let i = 0; i < camIds.length; i++) { %>
+        <a href="explore/<%=camIds[i]%>"><%=camIds[i]%></a><br>
+    <% } %>
+</div>

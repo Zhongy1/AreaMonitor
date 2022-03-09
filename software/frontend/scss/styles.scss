@@ -62,3 +62,12 @@ body {
         margin: auto;
     }
 }
+
+.cameras-text-view {
+    width: 100%;
+
+    >div {
+        margin: 8px 0px;
+        text-align: center;
+    }
+}

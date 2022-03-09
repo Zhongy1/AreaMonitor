@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import fastifyIO from 'fastify-socket.io'
-import { WebServerConfig } from '../subsystems/web-server';
+import { Mode, WebServerConfig } from '../subsystems/web-server';
 import { Namespace } from 'socket.io';
 import { io, Socket } from "socket.io-client";
 
@@ -37,7 +37,7 @@ export class SIOService {
             panTilt: this.app.io.of('/pt')
         }
 
-        if (this.config.master) {
+        if (this.config.mode == Mode.Master) {
             this.namespaces.external = this.app.io.of('/ext')
         }
         else {
