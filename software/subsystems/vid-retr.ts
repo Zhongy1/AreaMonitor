@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as del from 'del';
 import fastify, { FastifyInstance } from 'fastify';
 import fastify_static from 'fastify-static';
-import { CONFIG } from '../../config';
+import { CONFIG } from '../config';
 
 export interface VideoServerConfig {
     port: number,

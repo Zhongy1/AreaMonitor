@@ -1,5 +1,5 @@
 import { io, Socket } from "socket.io-client";
-import { CONFIG } from "../../config";
+import { CONFIG } from "../config";
 
 export interface NodeLogicConfig {
     // port: number; // may not be need

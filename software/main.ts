@@ -1,5 +1,5 @@
 import { spawn, fork, ChildProcess } from 'child_process';
-import { CONFIG } from '../config';
+import { CONFIG } from './config';
 
 interface Subprocesses {
     webServer: ChildProcess;

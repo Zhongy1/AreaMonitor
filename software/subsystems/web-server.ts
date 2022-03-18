@@ -1,10 +1,16 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import fastify, { FastifyInstance } from 'fastify';
 import formBody from 'fastify-formbody';
 import { SIOService } from '../services/sio-service';
 import { WebApp } from '../services/web-app';
 import { networkInterfaces } from 'os';
+import { getPublicIPs } from '../services/util';
+import { ChildProcess, fork } from 'child_process';
+import { CONFIG } from '../config';
 
 export interface WebServerConfig {
+    id: string;
     port: number;
     mode: Mode;
     camIP: string[];
@@ -20,6 +26,7 @@ export enum Mode {
 export class WebServer {
     private app: FastifyInstance;
     private sioService: SIOService;
+    private proxySubsystem: ChildProcess;
 
     private webapp: WebApp;
 
@@ -37,10 +44,11 @@ export class WebServer {
             ignoreTrailingSlash: true,
         });
 
-        this.sioService = new SIOService(this.app, config);
+        this.sioService = new SIOService(this.app, config, this.spawnProxySubsystem.bind(this));
         this.webapp = new WebApp(this.app, this.sioService, config);
 
         this.initialize();
+        this.spawnProxySubsystem();
     }
 
     public static log(str: string) {
@@ -116,21 +124,20 @@ export class WebServer {
         this.config.passwd = passwd;
         // console.log('SSID: ' + ssid);
     }
-}
 
-function getPublicIPs(): string[] {
-    const nets = networkInterfaces();
-    const results: string[] = [];
-
-    for (const name of Object.keys(nets)) {
-        for (const net of nets[name]) {
-            if (net.family === 'IPv4' && !net.internal) {
-                results.push(net.address);
-            }
+    public spawnProxySubsystem(): void {
+        if (!this.proxySubsystem) {
+            this.proxySubsystem = fork(path.resolve(process.cwd(), 'subsystems', 'proxy.ts'), ['-p', `${CONFIG.REVERSE_PROXY_SERVER_PORT}`]);
+        }
+        else {
+            this.proxySubsystem.kill();
+            let t: string[] = [];
+            Object.keys(this.sioService.clientNodes).forEach(sid => {
+                t.push(`${this.sioService.clientNodes[sid].id}:${this.sioService.clientNodes[sid].ip}`);
+            });
+            this.proxySubsystem = fork(path.resolve(process.cwd(), 'subsystems', 'proxy.ts'), ['-p', `${CONFIG.REVERSE_PROXY_SERVER_PORT}`, '-t', ...t]);
         }
     }
-
-    return results;
 }
 
 function main(): void {
@@ -145,14 +152,26 @@ function main(): void {
         throw 'Bad port';
     }
 
+    if (!fs.existsSync(path.resolve(process.cwd(), 'settings.json'))) {
+        fs.writeFileSync(path.resolve(process.cwd(), 'settings.json'), JSON.stringify({
+            id: `node${Math.floor(Math.random() * 100)}`,
+            mode: Mode.Unspecified,
+            targetIP: null
+        }, null, 4));
+    }
+
+    let settings = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), 'settings.json'), { encoding: 'utf8' }));
+
+    console.log('Web Server Spawned');
+
     let config: WebServerConfig = {
+        id: settings.id,
         port: port,
-        mode: Mode.Unspecified,
-        camIP: getPublicIPs()
+        mode: settings.mode,
+        camIP: getPublicIPs(),
+        targetIP: settings.targetIP
     }
     let webserver = new WebServer(config);
-
-    WebServer.log('Web Server Spawned');
 
 }
 

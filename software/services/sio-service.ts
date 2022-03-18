@@ -3,6 +3,7 @@ import fastifyIO from 'fastify-socket.io'
 import { Mode, WebServerConfig } from '../subsystems/web-server';
 import { Namespace } from 'socket.io';
 import { io, Socket } from "socket.io-client";
+import { ClientNode } from '../models/client-node';
 
 export interface SIONamespaces {
     external: Namespace | Socket;
@@ -15,8 +16,11 @@ export class SIOService {
     public initialized: boolean;
     private namespaces: SIONamespaces;
 
-    constructor(public app: FastifyInstance, private config: WebServerConfig) {
+    public clientNodes: { [sid: string]: ClientNode };
+
+    constructor(public app: FastifyInstance, private config: WebServerConfig, private proxyNewClient?: Function) {
         this.initialized = false;
+        this.clientNodes = {};
     }
 
     public registerIO(): void {
@@ -40,9 +44,9 @@ export class SIOService {
         if (this.config.mode == Mode.Master) {
             this.namespaces.external = this.app.io.of('/ext')
         }
-        else {
+        else if (this.config.mode == Mode.Client) {
             // specify the ip of the master camera
-            this.namespaces.external = io("ws://*/ext");
+            this.namespaces.external = io(`ws://${this.config.targetIP}/ext?id=${this.config.id}&ip=${this.config.camIP[0]}`);
         }
     }
 
@@ -59,6 +63,7 @@ export class SIOService {
             });
             socket.on('signalNode', (opts) => {
                 // to a target node; use extReceiveSignal
+
             });
             socket.on('ping', (opts) => {
                 // to a target node, use extPing
@@ -92,6 +97,44 @@ export class SIOService {
                 this.nlPong(opts);
             });
         });
+
+        this.initExternalListeners();
+    }
+
+    private initExternalListeners(): void {
+        if (this.config.mode == Mode.Master) {
+            (this.namespaces.external as Namespace).on('connection', (socket) => {
+                this.clientNodes[socket.id] = {
+                    ip: (Array.isArray(socket.handshake.query.ip)) ? socket.handshake.query.ip[0] : socket.handshake.query.ip,
+                    id: (Array.isArray(socket.handshake.query.id)) ? socket.handshake.query.id[0] : socket.handshake.query.id,
+                    sid: socket.id
+                }
+                if (this.proxyNewClient) {
+                    this.proxyNewClient();
+                }
+
+                socket.on('signalNode', (opts: any) => {
+                    this.nlReceiveSignal(opts);
+                });
+                socket.on('ping', (opts: any) => {
+                    this.nlPing(opts);
+                });
+                socket.on('pong', (opts: any) => {
+                    this.nlPong(opts);
+                });
+            });
+        }
+        else if (this.config.mode == Mode.Client) {
+            this.namespaces.external.on('signalNode', (opts: any) => {
+                this.nlReceiveSignal(opts);
+            });
+            this.namespaces.external.on('ping', (opts: any) => {
+                this.nlPing(opts);
+            });
+            this.namespaces.external.on('pong', (opts: any) => {
+                this.nlPong(opts);
+            });
+        }
     }
 
     public vpInformBusyState(opts: boolean): void {
@@ -126,7 +169,7 @@ export class SIOService {
         this.namespaces.panTilt.emit('setPos', opts);
     }
 
-    public extReceiveSignal(opts: any): void {
+    public extSignalNode(opts: any): void {
 
     }
 

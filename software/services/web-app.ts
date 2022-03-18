@@ -6,7 +6,7 @@ import fastify_static from 'fastify-static';
 import { Mode, WebServerConfig } from '../subsystems/web-server';
 import { SIOService } from './sio-service';
 import { VideoServerApi } from './video-server-api';
-import { CONFIG } from '../../config';
+import { CONFIG } from '../config';
 
 declare module "fastify" {
     interface FastifyReply {
