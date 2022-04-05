@@ -104,15 +104,15 @@ def proc():
                     obj_pos = [box[0] + box[2]/2, box[1] + box[3]/2] # Center of box
                     #print(obj_pos)
                     r = 0 
-                    if obj_pos[0] > 220:
+                    if obj_pos[0] > 266:
                         r = 15
-                    elif obj_pos[0] < 120:
+                    elif obj_pos[0] < 134:
                         r = -15
 
                     t = 0
-                    if obj_pos[1] > 215:
+                    if obj_pos[1] > 200:
                         t = 5
-                    elif obj_pos[1] < 85:
+                    elif obj_pos[1] < 100:
                         t = -5
                     
                     doOffsetRequest(r,t)
