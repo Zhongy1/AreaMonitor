@@ -41,6 +41,7 @@ export class NodeLogic {
             reconnectionDelayMax: 5000,
         });
         this.initIO();
+	this.startActivityLoop();
     }
 
     public initIO(): void {
@@ -167,7 +168,7 @@ function main() {
         // panCenter: 90 * Math.PI / 180,
         home: {
             r: 0,
-            t: 45
+            t: 0
         }
     });
 

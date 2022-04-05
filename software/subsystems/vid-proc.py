@@ -31,7 +31,7 @@ def connectIO():
     return
 
 def doOffsetRequest(r, t):                    
-    sio.emit('requestOffset', {'r': r, 't': t},  namespace='/vp')
+    sio.emit('requestOffset', {'x': r, 'y': t},  namespace='/vp')
 
 
 def proc():
@@ -72,6 +72,7 @@ def proc():
         # to have a maximum width of 400 pixels
         frame = vs.read()
         frame = imutils.resize(frame, width=400)
+        frame = imutils.rotate(frame, 180)
         # grab the frame dimensions and convert it to a blob
         (h, w) = frame.shape[:2]
         blob = cv2.dnn.blobFromImage(cv2.resize(frame, (300, 300)),
@@ -95,29 +96,45 @@ def proc():
                 idx = int(detections[0, 0, i, 1])
                 if idx == 15:
                     box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
-                    print(box)
+                    
+                    #print(box)
+                    
+                    # Bounding box coordinates are x, y, w, h. x, y start in top left corner
+                    # Max width is 400, max height is 300
+                    obj_pos = [box[0] + box[2]/2, box[1] + box[3]/2] # Center of box
+                    #print(obj_pos)
+                    r = 0 
+                    if obj_pos[0] > 220:
+                        r = 15
+                    elif obj_pos[0] < 120:
+                        r = -15
 
-                    #TODO input actual offset value, r,t
-                    doOffsetRequest(0,0)
+                    t = 0
+                    if obj_pos[1] > 215:
+                        t = 5
+                    elif obj_pos[1] < 85:
+                        t = -5
+                    
+                    doOffsetRequest(r,t)
 
-                    (startX, startY, endX, endY) = box.astype("int")
-                    # draw the prediction on the frame
-                    label = "{}: {:.2f}%".format(CLASSES[idx],
-                        confidence * 100)
-                    cv2.rectangle(frame, (startX, startY), (endX, endY),
-                        COLORS[idx], 2)
-                    y = startY - 15 if startY - 15 > 15 else startY + 15
-                    cv2.putText(frame, label, (startX, y),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
+                    #(startX, startY, endX, endY) = box.astype("int")
+                    ## draw the prediction on the frame
+                    #label = "{}: {:.2f}%".format(CLASSES[idx],
+                    #    confidence * 100)
+                    #cv2.rectangle(frame, (startX, startY), (endX, endY),
+                    #    COLORS[idx], 2)
+                    #y = startY - 15 if startY - 15 > 15 else startY + 15
+                    #cv2.putText(frame, label, (startX, y),
+                    #    cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
     
         # show the output frame
-        cv2.imshow("Frame", frame)
-        key = cv2.waitKey(1) & 0xFF
-        # if the `q` key was pressed, break from the loop
-        if key == ord("q"):
-            break
-        # update the FPS counter
-        fps.update()
+        #cv2.imshow("Frame", frame)
+        #key = cv2.waitKey(1) & 0xFF
+        ## if the `q` key was pressed, break from the loop
+        #if key == ord("q"):
+        #    break
+        ## update the FPS counter
+        #fps.update()
     
     # stop the timer and display FPS information
     fps.stop()

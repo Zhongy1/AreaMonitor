@@ -1,5 +1,5 @@
 {
-    "id": "node32",
-    "mode": 2,
-    "targetIP": null
+    "id": "node16",
+    "mode": 1,
+    "targetIP": "192.168.137.179"
 }

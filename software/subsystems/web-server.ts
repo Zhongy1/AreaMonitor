@@ -37,10 +37,10 @@ export class WebServer {
         this.configureMode(config.mode);
 
         this.app = fastify({
-            // logger: true,
-            logger: {
-                prettyPrint: true
-            },
+            logger: false,
+            //logger: {
+            //    prettyPrint: true
+            //},
             ignoreTrailingSlash: true,
         });
 

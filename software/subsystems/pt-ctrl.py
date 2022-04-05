@@ -16,8 +16,12 @@ class ptCtrl:
         self.panServoPin = 17
         self.tiltServoPin = 27
         self.pi = pigpio.pi()
+        self.pi.set_mode(self.panServoPin, pigpio.OUTPUT)
+        self.pi.set_mode(self.tiltServoPin, pigpio.OUTPUT)
+        self.pi.set_PWM_frequency(self.panServoPin, 50)
+        self.pi.set_PWM_frequency(self.tiltServoPin, 50)
         self.r = 1500
-        self.t = 2000
+        self.t = 1500
         self.pi.set_servo_pulsewidth(self.panServoPin, self.r)
         self.pi.set_servo_pulsewidth(self.tiltServoPin, self.t)
         
@@ -71,33 +75,33 @@ class ptCtrl:
         self.updatePos()
 
     def setPan(self, r):
-        if(r  > 2500):
-            r = 2500
-        elif(r < 500):
-            r = 500
+        if(r  > 70*2000/180 + 1500): # TODO IS WRONG?
+            r = 70*2000/180 + 1500
+        elif(r < -70*2000/180 + 1500):
+            r = -70*2000/180 + 1500
         self.r = r
         self.pi.set_servo_pulsewidth(self.panServoPin, self.r)
 
     def setPanDeg(self, r):
-        if(r  > 90):
-            r = 90
-        elif(r < -90):
-            r = -90
+        if(r  > 70):
+            r = 70
+        elif(r < -70):
+            r = -70
         self.r = r*2000/180 + 1500 
         self.pi.set_servo_pulsewidth(self.panServoPin, self.r)
         
 
     def setTilt(self, t):
-        if(t > 2500):
-            t = 2500
-        elif(t < 1500):
-            t = 1500
+        if(t > 70*2000/180 + 1500):
+            t = 70*2000/180 + 1500
+        elif(t < 0*2000/180 + 1500):
+            t = 0*2000/180 + 1500
         self.t = t
         self.pi.set_servo_pulsewidth(self.tiltServoPin, self.t)
 
     def setTiltDeg(self, t):
-        if(t > 90):
-            t = 90
+        if(t > 70):
+            t = 70
         elif(t < 0):
             t = 0
         self.t = t*2000/180 + 1500
