@@ -92,6 +92,13 @@ export class SIOService {
 
     private initExternalListeners(): void {
         if (this.config.mode == Mode.Master) {
+            this.clientNodes[this.config.id] = {
+                ip: this.config.camIP[0],
+                id: this.config.id,
+                sid: this.config.id,
+                leftTarget: null,
+                rightTarget: null
+            };
             (this.namespaces.external as Namespace).on('connection', (socket) => {
                 this.clientNodes[socket.id] = {
                     ip: (Array.isArray(socket.handshake.query.ip)) ? socket.handshake.query.ip[0] : socket.handshake.query.ip,
@@ -113,7 +120,24 @@ export class SIOService {
                 });
 
                 socket.on('signalNode', (opts: any) => {
-                    this.nlReceiveSignal(opts);
+                    if (this.clientNodes.hasOwnProperty(socket.id)) {
+                        if (opts == 'l' && this.clientNodes.hasOwnProperty(this.clientNodes[socket.id].leftTarget)) {
+                            if (this.clientNodes[socket.id].leftTarget == this.config.id) {
+                                this.nlReceiveSignal(opts);
+                            }
+                            else {
+                                this.extProxySignalNode(this.clientNodes[socket.id].leftTarget, opts);
+                            }
+                        }
+                        else if (opts == 'r' && this.clientNodes.hasOwnProperty(this.clientNodes[socket.id].rightTarget)) {
+                            if (this.clientNodes[socket.id].rightTarget == this.config.id) {
+                                this.nlReceiveSignal(opts);
+                            }
+                            else {
+                                this.extProxySignalNode(this.clientNodes[socket.id].rightTarget, opts);
+                            }
+                        }
+                    }
                 });
                 socket.on('ping', (opts: any) => {
                     this.nlPing(opts);
@@ -217,6 +241,12 @@ export class SIOService {
         }
         else if (this.config.mode == Mode.Client) {
             this.namespaces.external.emit('signalNode', opts);
+        }
+    }
+
+    public extProxySignalNode(targetId: string, opts: 'l' | 'r'): void {
+        if (this.config.mode == Mode.Master && this.clientNodes.hasOwnProperty(targetId)) {
+            (this.namespaces.external as Namespace).to(targetId).emit('signalNode', opts);
         }
     }
 

@@ -129,10 +129,10 @@ export class NodeLogic {
         this.currR = r;
         this.currT = t;
 
-        if (this.currR <= -80) {
+        if (this.currR <= -60) {
             this.signalNode('l');
         }
-        else if (this.currR >= 80) {
+        else if (this.currR >= 60) {
             this.signalNode('r');
         }
     }
@@ -154,10 +154,10 @@ export class NodeLogic {
 
     public receiveSignal(nodePos: 'l' | 'r') {
         if (nodePos == 'l') {
-            this.setPos(-85, 45);
+            this.setPos(-70, 0);
         }
         else if (nodePos == 'r') {
-            this.setPos(85, 45);
+            this.setPos(70, 0);
         }
     }
 }
