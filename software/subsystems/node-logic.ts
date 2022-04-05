@@ -182,7 +182,7 @@ function main() {
         // panCenter: 90 * Math.PI / 180,
         home: {
             r: 0,
-            t: 45
+            t: 0
         }
     });
 
