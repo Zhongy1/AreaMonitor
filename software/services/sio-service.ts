@@ -4,6 +4,7 @@ import { Mode, WebServerConfig } from '../subsystems/web-server';
 import { Namespace } from 'socket.io';
 import { io, Socket } from "socket.io-client";
 import { ClientNode } from '../models/client-node';
+import { CONFIG } from '../config';
 
 export interface SIONamespaces {
     external: Namespace | Socket;
@@ -61,8 +62,9 @@ export class SIOService {
             socket.on('setPos', (opts) => {
                 this.ptSetPos(opts);
             });
-            socket.on('signalNode', (opts) => {
-                // to a target node; use extReceiveSignal
+            socket.on('signalNode', (opts: 'l' | 'r') => {
+                // to a target node; use extReceiveSignal]
+                this.extSignalNode(opts);
 
             });
             socket.on('ping', (opts) => {
@@ -85,19 +87,6 @@ export class SIOService {
             });
         });
 
-
-        this.namespaces.videoProc.on('connection', (socket) => {
-            socket.on('signalNode', (opts) => {
-                this.nlReceiveSignal(opts);
-            });
-            socket.on('ping', (opts) => {
-                this.nlPing(opts);
-            });
-            socket.on('pong', (opts) => {
-                this.nlPong(opts);
-            });
-        });
-
         this.initExternalListeners();
     }
 
@@ -107,11 +96,21 @@ export class SIOService {
                 this.clientNodes[socket.id] = {
                     ip: (Array.isArray(socket.handshake.query.ip)) ? socket.handshake.query.ip[0] : socket.handshake.query.ip,
                     id: (Array.isArray(socket.handshake.query.id)) ? socket.handshake.query.id[0] : socket.handshake.query.id,
-                    sid: socket.id
+                    sid: socket.id,
+                    leftTarget: null,
+                    rightTarget: null
                 }
                 if (this.proxyNewClient) {
                     this.proxyNewClient();
                 }
+                socket.on('disconnect', (reason) => {
+                    if (this.clientNodes.hasOwnProperty(socket.id)) {
+                        delete this.clientNodes[socket.id];
+                        if (this.proxyNewClient) {
+                            this.proxyNewClient();
+                        }
+                    }
+                });
 
                 socket.on('signalNode', (opts: any) => {
                     this.nlReceiveSignal(opts);
@@ -125,7 +124,7 @@ export class SIOService {
             });
         }
         else if (this.config.mode == Mode.Client) {
-            this.namespaces.external.on('signalNode', (opts: any) => {
+            this.namespaces.external.on('signalNode', (opts: 'l' | 'r') => {
                 this.nlReceiveSignal(opts);
             });
             this.namespaces.external.on('ping', (opts: any) => {
@@ -149,8 +148,27 @@ export class SIOService {
         this.namespaces.nodeLogic.emit('updatePos', opts);
     }
 
-    public nlReceiveSignal(opts: any): void {
-        this.namespaces.nodeLogic.emit('receiveSignal', opts);
+    public nlReceiveSignal(opts: 'l' | 'r'): void {
+        if (CONFIG.DEBUG_CAM_SIGNALS) {
+            if (this.config.mode == Mode.Master) {
+                if (opts == 'l') {
+                    console.log(`[Cam ${this.config.id}] receiving signal from the left (Sender: Cam ${this.clientNodes[this.config.id].leftTarget})`);
+                }
+                else {
+                    console.log(`[Cam ${this.config.id}] receiving signal from the right (Sender: Cam ${this.clientNodes[this.config.id].rightTarget})`);
+                }
+            }
+            else if (this.config.mode == Mode.Client) {
+                if (opts == 'l') {
+                    console.log(`[Cam ${this.config.id}] receiving signal from the left`);
+                }
+                else {
+                    console.log(`[Cam ${this.config.id}] receiving signal from the right`);
+                }
+            }
+        }
+        let from: 'l' | 'r' = (opts == 'l') ? 'r' : 'l';
+        this.namespaces.nodeLogic.emit('receiveSignal', from);
     }
 
     public nlPing(opts: any): void {
@@ -169,8 +187,37 @@ export class SIOService {
         this.namespaces.panTilt.emit('setPos', opts);
     }
 
-    public extSignalNode(opts: any): void {
+    public extSignalNode(opts: 'l' | 'r'): void {
+        if (CONFIG.DEBUG_CAM_SIGNALS) {
+            if (this.config.mode == Mode.Master) {
+                if (opts == 'l') {
+                    console.log(`[Cam ${this.config.id}] signaling to the left (Target: Cam ${this.clientNodes[this.config.id].leftTarget})`);
+                }
+                else {
+                    console.log(`[Cam ${this.config.id}] signaling to the right (Target: Cam ${this.clientNodes[this.config.id].rightTarget})`);
+                }
+            }
+            else if (this.config.mode == Mode.Client) {
+                if (opts == 'l') {
+                    console.log(`[Cam ${this.config.id}] signaling to the left`);
+                }
+                else {
+                    console.log(`[Cam ${this.config.id}] signaling to the right`);
+                }
+            }
+        }
 
+        if (this.config.mode == Mode.Master) {
+            if (opts == 'l') {
+                (this.namespaces.external as Namespace).to(this.clientNodes[this.config.id].leftTarget).emit('signalNode', opts);
+            }
+            else {
+                (this.namespaces.external as Namespace).to(this.clientNodes[this.config.id].rightTarget).emit('signalNode', opts);
+            }
+        }
+        else if (this.config.mode == Mode.Client) {
+            this.namespaces.external.emit('signalNode', opts);
+        }
     }
 
     public extPing(opts: any): void {
@@ -181,7 +228,14 @@ export class SIOService {
 
     }
 
-    public linkNode(): void {
-
+    public linkNode(camSid: string, side: string, linkTo: string): void {
+        if (this.clientNodes.hasOwnProperty(camSid) && this.clientNodes.hasOwnProperty(linkTo)) {
+            if (side == 'l') {
+                this.clientNodes[camSid].leftTarget = linkTo;
+            }
+            else if (side == 'r') {
+                this.clientNodes[camSid].rightTarget = linkTo;
+            }
+        }
     }
 }

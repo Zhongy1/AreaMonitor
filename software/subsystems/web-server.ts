@@ -38,13 +38,13 @@ export class WebServer {
 
         this.app = fastify({
             // logger: true,
-            logger: {
+            logger: CONFIG.LOG_WEB_SERVER ? {
                 prettyPrint: true
-            },
+            } : false,
             ignoreTrailingSlash: true,
         });
 
-        this.sioService = new SIOService(this.app, config, this.spawnProxySubsystem.bind(this));
+        this.sioService = new SIOService(this.app, config, this.handleCameraConnections.bind(this));
         this.webapp = new WebApp(this.app, this.sioService, config);
 
         this.initialize();
@@ -103,7 +103,7 @@ export class WebServer {
     }
 
     public handleCameraConnections(opts?: unknown): void {
-        // ?
+        this.spawnProxySubsystem();
     }
 
     private configureMode(mode: Mode): void {

@@ -17,9 +17,9 @@ export class VideoServer {
     constructor(private config: VideoServerConfig) {
         this.app = fastify({
             // logger: true,
-            logger: {
+            logger: CONFIG.LOG_VIDEO_SERVER ? {
                 prettyPrint: true
-            },
+            } : false,
             ignoreTrailingSlash: true,
         });
 

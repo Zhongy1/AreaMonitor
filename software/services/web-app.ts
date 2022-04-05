@@ -7,6 +7,8 @@ import { Mode, WebServerConfig } from '../subsystems/web-server';
 import { SIOService } from './sio-service';
 import { VideoServerApi } from './video-server-api';
 import { CONFIG } from '../config';
+import { WPAConfig } from '../models/wpa-config';
+import { exec } from 'child_process';
 
 declare module "fastify" {
     interface FastifyReply {
@@ -65,26 +67,33 @@ export class WebApp {
         });
 
         this.app.post<{ Body: { ssid: string; passwd: string; master: string; camIP: string } }>('/config', async (req, reply) => {
-            console.log(`SSID: ${req.body.ssid}\nPassword: ${req.body.passwd}\nMaster: ${req.body.master}\nMaster IP: ${req.body.camIP}`);
+            if (CONFIG.DEBUG_UI_FORMS) {
+                console.log(`SSID: ${req.body.ssid}\nPassword: ${req.body.passwd}\nMaster: ${req.body.master}\nMaster IP: ${req.body.camIP}`);
+            }
+            this.configureWPA({ ssid: req.body.ssid, passwd: req.body.passwd });
             return reply.redirect('/config');
         });
 
         this.app.get('/cameras', async (req, reply) => {
             return reply.desktop('cameras', {
                 title: 'Cameras',
-                camIds: ['123', '456', '789']
+                camIds: Object.keys(this.sioService.clientNodes).map(sid => this.sioService.clientNodes[sid].id)
             });
         });
 
         this.app.post<{ Body: any }>('/cameras', async (req, reply) => {
-            console.log(req.body);
+            if (CONFIG.DEBUG_UI_FORMS) {
+                console.log('Node Configuration:');
+                console.log(req.body);
+            }
+            this.configureCamConnections(req.body);
             return reply.redirect('/cameras');
         });
 
         this.app.get('/explore', async (req, reply) => {
             return reply.desktop('explore', {
                 title: 'Explore',
-                camIds: ['123', '456', '789']
+                camIds: Object.keys(this.sioService.clientNodes).map(sid => this.sioService.clientNodes[sid].id)
             });
         });
 
@@ -125,6 +134,22 @@ export class WebApp {
             this.sioService.ptSetPos({ r: r, t: t });
             reply.status(204);
             return;
+        });
+    }
+
+    private configureWPA(opts: WPAConfig): void {
+        exec(`wpa_passphrase ${opts.ssid} ${opts.passwd} > ${CONFIG.WPA_SUPPLICANT_PATH}; ${CONFIG.WPA_RESTART}`);
+    }
+
+    private configureCamConnections(opts: any): void {
+        let idToSidMap: { [id: string]: string } = {};
+        Object.keys(this.sioService.clientNodes).forEach(sid => {
+            let cn = this.sioService.clientNodes[sid];
+            idToSidMap[cn.id] = sid;
+        });
+        Object.keys(opts).forEach(opt => {
+            let o = opt.split('_');
+            this.sioService.linkNode(o[0], o[1], opts[opt])
         });
     }
 }

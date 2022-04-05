@@ -41,6 +41,7 @@ export class NodeLogic {
             reconnectionDelayMax: 5000,
         });
         this.initIO();
+        this.startActivityLoop();
     }
 
     public initIO(): void {
@@ -54,7 +55,9 @@ export class NodeLogic {
         });
 
         this.sIO.on('receiveSignal', (opts) => {
-
+            if (this.active && Date.now() > this.lastActivity + CONFIG.SIGNAL_IGNORE_TIMER) {
+                this.receiveSignal(opts);
+            }
         });
         this.sIO.on('ping', (opts) => {
 
@@ -78,8 +81,8 @@ export class NodeLogic {
 
     public startActivityLoop(): void {
         setInterval(() => {
-            // 20 seconds of inactivity -> disable recording
-            if (this.active && Date.now() > this.lastActivity + 20000) {
+            // INACTIVITY_TIMER seconds of inactivity -> disable recording
+            if (this.active && Date.now() > this.lastActivity + CONFIG.INACTIVITY_TIMER) {
                 this.informBusyState(false);
             }
         }, 1000);
@@ -125,6 +128,13 @@ export class NodeLogic {
     public updatePos(r: number, t: number) {
         this.currR = r;
         this.currT = t;
+
+        if (this.currR <= -80) {
+            this.signalNode('l');
+        }
+        else if (this.currR >= 80) {
+            this.signalNode('r');
+        }
     }
 
     public requestOffset(x: number, y: number) {
@@ -138,12 +148,17 @@ export class NodeLogic {
         this.sIO.emit('informBusyState', busy);
     }
 
-    public signalNode(nodeId: string, nodePos: 'l' | 'r') {
-
+    public signalNode(nodePos: 'l' | 'r') {
+        this.sIO.emit('signalNode', nodePos);
     }
 
     public receiveSignal(nodePos: 'l' | 'r') {
-
+        if (nodePos == 'l') {
+            this.setPos(-85, 45);
+        }
+        else if (nodePos == 'r') {
+            this.setPos(85, 45);
+        }
     }
 }
 

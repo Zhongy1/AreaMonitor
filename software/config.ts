@@ -8,5 +8,16 @@ export const CONFIG = {
 
     DEFAULT_VID_DIRECTORY: 'storage',
 
-    SIGNAL_MIN_INTERVAL: 1000
+    WPA_CONFIGURABLE: false,
+    WPA_SUPPLICANT_PATH: '/etc/wpa_supplicant/wpa_supplicant.conf',
+    WPA_RESTART: 'systemctl restart wpa_supplicant',
+
+    SIGNAL_MIN_INTERVAL: 1000,
+    INACTIVITY_TIMER: 20000,
+    SIGNAL_IGNORE_TIMER: 4000,
+
+    LOG_WEB_SERVER: false,
+    LOG_VIDEO_SERVER: false,
+    DEBUG_CAM_SIGNALS: true,
+    DEBUG_UI_FORMS: true
 }
