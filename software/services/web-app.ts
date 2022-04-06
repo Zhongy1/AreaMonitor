@@ -138,7 +138,9 @@ export class WebApp {
     }
 
     private configureWPA(opts: WPAConfig): void {
-        exec(`wpa_passphrase ${opts.ssid} ${opts.passwd} > ${CONFIG.WPA_SUPPLICANT_PATH}; ${CONFIG.WPA_RESTART}`);
+        if (CONFIG.WPA_CONFIGURABLE) {
+            exec(`wpa_passphrase ${opts.ssid} ${opts.passwd} > ${CONFIG.WPA_SUPPLICANT_PATH}; ${CONFIG.WPA_RESTART}`);
+        }
     }
 
     private configureCamConnections(opts: any): void {
